@@ -1,0 +1,155 @@
+/*Nilesh Kuar Sahu
+MT/CS/10002/2018*/
+
+#include <iostream>
+#define MAX 10
+using namespace std;
+#include<stdlib.h>
+typedef struct node
+{
+    int info;
+    node *next;
+}list;
+
+list *root[MAX],*ptr[MAX];
+
+class dict
+{
+    int index;
+    public:
+        dict()
+        {
+            index=-1;
+            int i=0;
+            while(i<MAX)
+            {
+                root[i]=NULL;
+                ptr[i]=NULL;
+                i++;
+            }
+        }
+        void insertion(int);
+        void search1(int);
+        void delete1(int);
+        void print1();
+};
+void dict::insertion(int item)
+{
+    list *prev=NULL,*p;
+     list *nw=new list;
+     nw->info=item;
+     index=item%MAX;
+     p=root[index];
+     while(item>p->info&&p!=NULL)
+     {
+         prev=p;
+         p=p->next;
+     }
+     nw->next=p;
+     if(prev==NULL)
+     {
+         root[index]=nw;
+         return;
+     }
+     prev->next=nw;
+}
+void dict::print1()
+{
+    list *p;
+    int i=0;
+    while(i<MAX)
+    {
+        p=root[i];
+        while(p!=NULL)
+        {
+            cout<<p->info<<"->";
+            p=p->next;
+        }
+        cout<<"\n";
+        i++;
+    }
+
+}
+void dict::search1(int item)
+{
+    list *p;
+    index=item%MAX;
+    p=root[index];
+    int c=0;
+    while(p!=NULL)
+    {
+        if(p->info==item)
+        {
+            cout<<"Congratulations, The no. you searched for is present in the dictionary and the element was "<<p->info;
+            c++;
+            return;
+        }
+        p=p->next;
+    }
+    if(c==0)
+    {
+        cout<<"Alas! Not Found"<<"\n";
+    }
+}
+void dict::delete1(int key)
+{
+    list *p,*prev=NULL;
+    index=key%MAX;
+    p=root[index];
+    while(p!=NULL)
+    {
+        if(p->info==key)
+        {
+           cout<<"\n deleted element found\n";
+            if(prev==NULL)
+            {
+                root[index]=p->next;
+
+            }
+            else
+            {
+                prev->next=p->next;
+            }
+            free(p);return;
+        }
+        prev=p;
+        p=p->next;
+    }
+}
+int main()
+{
+    dict obj;
+    cout<<"--------- Welcome to the Apple Dictionary ---------------"<<"\n";
+    cout<<"---------- Create your own Dictionary--------------------"<<"\n";
+    int n;
+    cout<<"Enter the number of element you want in your dictionary"<<"\n";
+    cin>>n;
+    int i=0,temp1,temp2,temp3;
+    cout<<"Now Please give input to your Dictionary"<<"\n";
+    while(i<n)
+    {
+        cin>>temp1;
+        obj.insertion(temp1);
+        i++;
+    }
+    obj.print1();
+    cout<<"Do you want to verify whether the given element is in the dictionary or not ? If yes then enter 1"<<"\n";
+    cin>>temp2;
+    if(temp2==1)
+    {
+        cout<<"Please enter the element to be searched"<<"\n";
+        cin>>temp3;
+        obj.search1(temp3);
+    }
+    cout<<"Do you want to delete any of the element inputted by you ? If yes then enter 1"<<"\n";
+    cin>>temp2;
+    if(temp2==1)
+    {
+        cout<<"Please enter the element to be deleted"<<"\n";\
+        cin>>temp3;
+        obj.delete1(temp3);
+    }
+    cout<<"List after deletion is"<<"\n";
+    obj.print1();
+    return 0;
+}
