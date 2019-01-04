@@ -1,0 +1,383 @@
+/*Nilesh Kuar Sahu
+MT/CS/10002/2018*/
+#include <iostream>
+#include<bits/stdc++.h>
+using namespace std;
+struct node
+{
+    node* parent;
+    node* child;
+    node* left;
+    node* right;
+    int key;
+    int degree;
+    char mark;
+    char c;
+};
+class fibonacci_heap
+{
+    public:
+        void insertion(int);
+        void Fibonnaci_link(node*,node*);
+        void Consolidate();
+        void Extract_min();
+        void Cut(node*,node*);
+        void Cascase_cut(node*);
+        void Decrease_key(node*,int);
+        void Find(node*,int,int);
+        void Deletion(int);
+        void display();
+};
+node* mini = NULL;
+int no_of_nodes = 0;
+
+void fibonacci_heap::insertion(int val)
+{
+    node* new_node = new node;
+    new_node->key = val;
+    new_node->degree = 0;
+    new_node->mark = 'W';
+    new_node->c = 'N';
+    new_node->parent = NULL;
+    new_node->child = NULL;
+    new_node->left = new_node;
+    new_node->right = new_node;
+    if (mini != NULL)
+    {
+        (mini->left)->right = new_node;
+        new_node->right = mini;
+        new_node->left = mini->left;
+        mini->left = new_node;
+        if (new_node->key < mini->key)
+        {
+            mini = new_node;
+        }
+    }
+    else
+    {
+        mini = new_node;
+    }
+    no_of_nodes++;
+}
+void fibonacci_heap::Fibonnaci_link(node* ptr2,node* ptr1)
+{
+    (ptr2->left)->right = ptr2->right;
+    (ptr2->right)->left = ptr2->left;
+    if (ptr1->right == ptr1)
+    {
+        mini = ptr1;
+    }
+    ptr2->left = ptr2;
+    ptr2->right = ptr2;
+    ptr2->parent = ptr1;
+    if (ptr1->child == NULL)
+    {
+        ptr1->child = ptr2;
+    }
+    ptr2->right = ptr1->child;
+    ptr2->left = (ptr1->child)->left;
+    ((ptr1->child)->left)->right = ptr2;
+    (ptr1->child)->left = ptr2;
+    if (ptr2->key < (ptr1->child)->key)
+    {
+        ptr1->child = ptr2;
+    }
+    ptr1->degree++;
+}
+void fibonacci_heap::Consolidate()
+{
+    int temp1;
+    float temp2 = (log(no_of_nodes)) / (log(2));
+    int temp3 = temp2;
+    node* arr[temp3];
+    for (int i = 0; i <= temp3; i++)
+    {
+        arr[i] = NULL;
+    }
+    node* ptr1 = mini;
+    node* ptr2;
+    node* ptr3;
+    node* ptr4 = ptr1;
+    do
+    {
+        ptr4 = ptr4->right;
+        temp1 = ptr1->degree;
+        while (arr[temp1] != NULL)
+        {
+            ptr2 = arr[temp1];
+            if (ptr1->key > ptr2->key)
+            {
+                ptr3 = ptr1;
+                ptr1 = ptr2;
+                ptr2 = ptr3;
+            }
+            if (ptr2 == mini)
+            {
+                mini = ptr1;
+            }
+            Fibonnaci_link(ptr2, ptr1);
+            if (ptr1->right == ptr1)
+            {
+                mini = ptr1;
+            }
+            arr[temp1] = NULL;
+            temp1++;
+        }
+        arr[temp1] = ptr1;
+        ptr1 = ptr1->right;
+    } while (ptr1 != mini);
+    mini = NULL;
+    for (int j = 0; j <= temp3; j++)
+    {
+        if (arr[j] != NULL)
+        {
+            arr[j]->left = arr[j];
+            arr[j]->right = arr[j];
+            if (mini != NULL)
+            {
+                (mini->left)->right = arr[j];
+                arr[j]->right = mini;
+                arr[j]->left = mini->left;
+                mini->left = arr[j];
+                if (arr[j]->key < mini->key)
+                {
+                    mini = arr[j];
+                }
+            }
+            else
+            {
+                mini = arr[j];
+            }
+            if (mini == NULL)
+            {
+                mini = arr[j];
+            }
+            else if (arr[j]->key < mini->key)
+            {
+                mini = arr[j];
+            }
+        }
+    }
+}
+
+void fibonacci_heap::Extract_min()
+{
+    if (mini == NULL)
+    {
+        cout << "The heap is empty" << endl;
+    }
+    else
+    {
+        node* temp = mini;
+        node* pntr;
+        pntr = temp;
+        node* x = NULL;
+        if (temp->child != NULL)
+        {
+
+            x = temp->child;
+            do
+            {
+                pntr = x->right;
+                (mini->left)->right = x;
+                x->right = mini;
+                x->left = mini->left;
+                mini->left = x;
+                if (x->key < mini->key)
+                {
+                    mini = x;
+                }
+                x->parent = NULL;
+                x = pntr;
+            } while (pntr != temp->child);
+        }
+        (temp->left)->right = temp->right;
+        (temp->right)->left = temp->left;
+        mini = temp->right;
+        if (temp == temp->right && temp->child == NULL)
+        {
+            mini = NULL;
+        }
+        else
+        {
+            mini = temp->right;
+            Consolidate();
+        }
+        no_of_nodes--;
+    }
+}
+
+void fibonacci_heap::Cut(node* found,node* temp)
+{
+    if (found == found->right)
+    {
+        temp->child = NULL;
+    }
+    (found->left)->right = found->right;
+    (found->right)->left = found->left;
+    if (found == temp->child)
+    {
+        temp->child = found->right;
+    }
+    temp->degree = temp->degree - 1;
+    found->right = found;
+    found->left = found;
+    (mini->left)->right = found;
+    found->right = mini;
+    found->left = mini->left;
+    mini->left = found;
+    found->parent = NULL;
+    found->mark = 'B';
+}
+
+void fibonacci_heap::Cascase_cut(node* temp)
+{
+    node* ptr5 = temp->parent;
+    if (ptr5 != NULL)
+    {
+        if (temp->mark == 'W')
+        {
+            temp->mark = 'B';
+        }
+        else
+        {
+            Cut(temp,ptr5);
+            Cascase_cut(ptr5);
+        }
+    }
+}
+
+void fibonacci_heap::Decrease_key(node* found, int val)
+{
+    if (mini == NULL)
+    {
+        cout << "The Heap is Empty" <<"\n";
+    }
+    if (found == NULL)
+    {
+        cout << "Node not found in the Heap" <<"\n";
+    }
+    found->key = val;
+    node* temp = found->parent;
+    if (temp != NULL && found->key < temp->key)
+    {
+        Cut(found, temp);
+        Cascase_cut(temp);
+    }
+    if (found->key < mini->key)
+    {
+        mini = found;
+    }
+}
+
+void fibonacci_heap::Find(node* mini, int old_val, int val)
+{
+     node* found = NULL;
+    node* temp5 = mini;
+    temp5->c = 'Y';
+    node* found_ptr = NULL;
+    if (temp5->key == old_val)
+    {
+        found_ptr = temp5;
+        temp5->c = 'N';
+        found = found_ptr;
+        Decrease_key(found, val);
+    }
+    if (found_ptr == NULL)
+    {
+        if (temp5->child != NULL)
+        {
+            Find(temp5->child, old_val, val);
+        }
+        if ((temp5->right)->c != 'Y')
+        {
+            Find(temp5->right, old_val, val);
+        }
+    }
+    temp5->c = 'N';
+    found = found_ptr;
+}
+
+void fibonacci_heap::Deletion(int val)
+{
+    if (mini == NULL)
+    {
+        cout << "The heap is empty" <<"\n";
+    }
+    else
+    {
+        Find(mini, val, 0);
+        Extract_min();
+        cout << "Key Deleted" <<"\n";
+    }
+}
+
+void fibonacci_heap::display()
+{
+    node* ptr = mini;
+    if (ptr == NULL)
+    {
+        cout << "The Heap is Empty" << endl;
+    }
+    else
+    {
+        cout << "The root nodes of Heap are: " << endl;
+        do
+        {
+            cout << ptr->key;
+            ptr = ptr->right;
+            if (ptr != mini)
+            {
+                cout << "-->";
+            }
+        } while (ptr != mini && ptr->right != NULL);
+        cout <<"\n"<< "The heap has " << no_of_nodes << " nodes" <<"\n"<<"\n";
+    }
+}
+
+int main()
+{
+    cout<<"Welcome to Apple Fibonacci Heap"<<"\n";
+    fibonacci_heap obj;
+    while(1)
+    {
+        cout<<"Press for 1.Insertion 2.Extracting Minimum 3.Decrease a key 4.Delete 5.Display"<<"\n";
+        int ch;
+        cin>>ch;
+        if(ch==1)
+        {
+            cout<<"Please enter the number to insert"<<"\n";
+            int num;
+            cin>>num;
+            obj.insertion(num);
+        }
+        else if(ch==2)
+        {
+            cout<<"Welcome to Apple Fibonacci heap Extract Minimum block"<<"\n";
+            obj.Extract_min();
+        }
+        else if(ch==3)
+        {
+            cout<<"Please Enter the old and new value"<<"\n";
+            int num1,num2;
+            cin>>num1>>num2;
+            obj.Find(mini,num1,num2);
+        }
+        else if(ch==4)
+        {
+            cout<<"Please Enter the key value to delete"<<"\n";
+            int num;
+            cin>>num;
+            obj.Deletion(num);
+        }
+        else if(ch==5)
+        {
+            obj.display();
+        }
+        else
+        {
+            break;
+        }
+    }
+    return 0;
+}
