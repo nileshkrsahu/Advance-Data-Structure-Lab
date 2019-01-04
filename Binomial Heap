@@ -1,0 +1,355 @@
+/*Nilesh Kuar Sahu
+MT/CS/10002/2018*/
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+
+struct node {
+    int key;
+    int degree;
+    node* parent;
+    node* child;
+    node* sibling;
+};
+class binomheap
+{
+    public:
+        node* make_binomial_heap();
+        void binomial_link(node*,node*);
+        node* createnode(int);
+        node* binomial_heap_union(node*,node*);
+        node* binomial_heap_insert(node*,node*);
+        node* binomial_heap_merge(node*,node*);
+        node* binomial_heap_extract_min(node*);
+        node *finding_node(node*,int);
+        void minimum(node*);
+        void revert(node*);
+        void display(node*);
+        void binomial_heap_decrease_key(node*, int, int);
+        void printing(node*);
+};
+node *HH=NULL;
+node *H=NULL;
+node* binomheap::make_binomial_heap()
+{
+    H=NULL;
+    return H;
+}
+void binomheap::binomial_link(node *y,node *z)
+{
+    y->parent=z;
+    y->sibling=z->child;
+    z->child=y;
+    z->degree=z->degree+1;
+}
+node *binomheap::createnode(int key)
+{
+    node *temp=new node;
+    temp->key=key;
+    return temp;
+}
+node* binomheap::binomial_heap_union(node *H1,node *H2)
+{
+    node* prev_x;
+    node* next_x;
+    node* x;
+    node* H=make_binomial_heap();
+    H=binomial_heap_merge(H1,H2);
+    if(H==NULL)
+    {
+        return H;
+    }
+    prev_x=NULL;
+    x=H;
+    next_x=x->sibling;
+    while(next_x!=NULL)
+    {
+        if(x->degree!=next_x->degree||((next_x->sibling!=NULL)&&(next_x->sibling->degree)==x->degree))
+        {
+            prev_x=x; // CASE 1&2
+            x=next_x; // CASE 1&2
+        }
+        else
+        {
+            if(x->key<=next_x->key)
+            {
+                x->sibling=next_x->sibling;  // CASE 3
+                binomial_link(next_x,x);
+            }
+            else
+            {
+                if(prev_x==NULL) // CASE 4
+                {
+                    H=next_x;
+                }
+                else
+                {
+                    prev_x->sibling=next_x;
+                }
+                binomial_link(x,next_x);
+                x=next_x;
+            }
+        }
+        next_x=x->sibling;
+    }
+    return H;
+}
+node* binomheap::binomial_heap_insert(node *H,node *x)
+{
+    node *H1=make_binomial_heap();
+    x->parent=x->child=x->sibling=NULL;
+    x->degree=0;
+    H1=x;
+    H=binomial_heap_union(H,H1);
+    return H;
+}
+node* binomheap::binomial_heap_merge(node *H1,node *H2)
+{
+    node *H=make_binomial_heap();
+    node *y,*z,*a,*b;
+    y=H1;
+    z=H2;
+    if(y!=NULL)
+    {
+        if(z!=NULL&&y->degree<=z->degree)
+        {
+            H=y;
+        }
+        else if(z!=NULL&&y->degree>z->degree)
+        {
+            H=z;
+        }
+        else
+        {
+            H=y;
+        }
+    }
+    else
+    {
+        H=z;
+    }
+    while(y!=NULL&&z!=NULL)
+    {
+        if(y->degree<z->degree)
+        {
+            y=y->sibling;
+        }
+        else if(y->degree==z->degree)
+        {
+            a=y->sibling;
+            y->sibling=z;
+            y=a;
+        }
+        else
+        {
+            b=z->sibling;
+            z->sibling=y;
+            z=b;
+        }
+    }
+    return H;
+}
+void binomheap::display(node *H)
+{
+    node *temp;
+    if(H==NULL)
+    {
+        cout<<"Sorry to say but the Heap is Empty"<<"\n";
+        return ;
+    }
+    cout<<"The root node of Apple Binomial Heap are : "<<"\n";
+    temp=H;
+    while(temp!=NULL)
+    {
+        cout<<temp->key<<" ";
+        if(temp->sibling!=NULL)
+        {
+            cout<<"----->";
+        }
+        temp=temp->sibling;
+    }
+    cout<<"\n";
+}
+void binomheap::printing(node *temp)
+{
+    while (temp)
+    {
+        cout<<"Address of temp : "<<temp<<" Key : "<<temp->key<<" child : "<<temp->child<<" h->sibbling : "<<temp->sibling<<"\n";
+        printing(temp->child);
+        cout<<"\n\n";
+        temp = temp->sibling;
+    }
+    cout<<"\n";
+}
+node* binomheap::binomial_heap_extract_min(node *H1)
+{
+    int mini=99999;
+    node *t=NULL;
+    node *x=H1;
+    node *HH,*p;
+    HH=NULL;
+    if(x==NULL)
+    {
+        cout<<"Sorry to say but there is nothing to extract"<<"\n";
+        return x;
+    }
+    p=x;
+    while(p->sibling!=NULL)
+    {
+        if(p->sibling->key<mini)
+        {
+            mini=p->sibling->key;
+            t=p;
+            x=p->sibling;
+        }
+        p=p->sibling;
+    }
+    if(t==NULL&&x->sibling==NULL)
+    {
+        H1=NULL;
+    }
+    else if(t==NULL)
+    {
+        H1=x->sibling;
+    }
+    else if(t->sibling==NULL)
+    {
+        t=NULL;
+    }
+    else
+    {
+        t->sibling=x->sibling;
+    }
+    if(x->child!=NULL)
+    {
+        revert(x->child);
+        x->child->sibling=NULL;
+    }
+    H=binomial_heap_union(H1,HH);
+    return x;
+}
+void binomheap::revert(node *y)
+{
+    if(y->sibling!=NULL)
+    {
+        revert(y->sibling);
+        y->sibling->sibling=y;
+    }
+    else
+    {
+        HH=y;
+    }
+}
+node* binomheap::finding_node(node *H,int key)
+{
+    node *x=H;
+    node *p=NULL;
+    if(x->key==key)
+    {
+        p=x;
+        return p;
+    }
+    if(x->child!=NULL&&p==NULL)
+    {
+        p=finding_node(x->child,key);
+    }
+    if(x->sibling!=NULL&&p==NULL)
+    {
+        p=finding_node(x->sibling,key);
+    }
+    return p;
+}
+void binomheap::binomial_heap_decrease_key(node *H,int i,int key)
+{
+    int temp;
+    node *p,*y,*z;
+    p=finding_node(H,i);
+    if(p==NULL)
+    {
+        cout<<"Sorry to say but it's an Invalid Choice"<<"\n";
+        return ;
+    }
+    if(key>p->key)
+    {
+        cout<<"Sorry to say but the New Key is greater than the current key"<<"\n";
+        return ;
+    }
+    p->key=key;
+    y=p;
+    z=p->parent;
+    while(z!=NULL&&y->key<z->key)
+    {
+        temp=y->key;
+        y->key=z->key;
+        z->key=temp;
+        y=z;
+        z=z->parent;
+    }
+    cout<<"The Key is reduced successfully"<<"\n";
+}
+void binomheap::minimum(node *H)
+{
+    node *x=H;
+    int mini=99999;
+    while(x!=NULL)
+    {
+        if(x->key<mini)
+        {
+            mini=x->key;
+        }
+        x=x->sibling;
+    }
+    cout<<"Minimum node is : "<<mini<<"\n";
+}
+int main()
+{
+    node *p;
+    binomheap obj;
+    cout<<"Welcome Apple Binomial Heap"<<"\n";
+    while(1)
+    {
+        cout<<"Please Press for 1.Insertion 2.Extracting the Minimum Key 3.Decrease a key 4.Minimum 5.Display"<<"\n";
+        int ch;
+        cin>>ch;
+        if(ch==1)
+        {
+            cout<<"Welcome to Insertion block"<<"\n";
+            cout<<"Please Enter the key value"<<"\n";
+            int num;
+            cin>>num;
+            p=obj.createnode(num);
+            H=obj.binomial_heap_insert(H,p);
+        }
+        else if(ch==2)
+        {
+            cout<<"Welcome to Extracting the Minimum Key block"<<"\n";
+            p=obj.binomial_heap_extract_min(H);
+            cout<<"The Extracted node is : "<<p->key<<"\n";
+
+        }
+        else if(ch==3)
+        {
+            cout<<"Welcome to Decrease a Key block"<<"\n";
+            cout<<"Enter the Key value of a node which is to be decreased and also enter the new Key value"<<"\n";
+            int num,num1;
+            cin>>num>>num1;
+            obj.binomial_heap_decrease_key(H,num,num1);
+        }
+        else if(ch==4)
+        {
+            cout<<"Welcome to finding Minimum Key block"<<"\n";
+            obj.minimum(H);
+        }
+        else if(ch==5)
+        {
+            cout<<"Welcome to Display block"<<"\n";
+            obj.display(H);
+            obj.printing(H);
+        }
+        else
+        {
+            break;
+        }
+    }
+    return 0;
+}
