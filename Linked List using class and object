@@ -1,0 +1,173 @@
+/*Nilesh Kuar Sahu
+MT/CS/10002/2018*/
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+
+class linkedlist
+{
+    public:
+        class Node
+        {
+            public:
+            int data;
+            Node *next;
+        };
+        void insertion(int);
+        void deleteion(int);
+        void searching(int);
+        void display();
+        Node *head=NULL;
+};
+
+void linkedlist::insertion(int data)
+{
+    Node *p=new Node;
+    p->data=data;
+    p->next=NULL;
+    if(head==NULL)
+    {
+        head=p;
+    }
+    else if(data<head->data)
+    {
+        cout<<"Sorry the no. you want to insert is less than the head pointer"<<"\n";
+        return;
+    }
+    else
+    {
+        Node *ptr=head;
+        Node *prev=NULL;
+        while(ptr!=NULL)
+        {
+            if(ptr->data<data)
+            {
+                prev=ptr;
+                ptr=ptr->next;
+            }
+            else
+            {
+                break;
+            }
+        }
+        p->next=prev->next;
+        prev->next=p;
+    }
+}
+void linkedlist::deleteion(int data)
+{
+    int c=0;
+    if(head==NULL)
+    {
+        cout<<"Sorry the List is empty, there is nothing to delete"<<"\n";
+    }
+    else if(head->data==data)
+    {
+        cout<<"Element found and deleted"<<"\n";
+        head=head->next;
+    }
+    else
+    {
+        Node *ptr=head;
+        Node *prev=head;
+        while(ptr!=NULL)
+        {
+            if(ptr->data==data)
+            {
+                cout<<"Element found and deleted"<<"\n";
+                prev->next=ptr->next;
+                c++;
+                break;
+            }
+            else if(ptr->data>data)
+            {
+                break;
+            }
+            else
+            {
+                prev=ptr;
+                ptr=ptr->next;
+            }
+        }
+        if(c==0)
+        {
+            cout<<"Sorry the element not found in the list so AlAS! not deleted"<<"\n";
+        }
+    }
+}
+void linkedlist::searching(int data)
+{
+    Node *ptr=head;
+    int c=0;
+    while(ptr!=NULL)
+    {
+        if(ptr->data==data)
+        {
+            cout<<"Element Found in the List"<<"\n";
+            c++;
+            break;
+        }
+        else if(ptr->data>data)
+        {
+             break;
+        }
+        ptr=ptr->next;
+    }
+    if(c==0)
+    {
+        cout<<"Sorry the searched Element is not found in the List"<<"\n";
+    }
+}
+void linkedlist::display()
+{
+    Node *ptr=head;
+    if(ptr==NULL)
+    {
+        cout<<"List is Empty"<<"\n";
+    }
+    while(ptr!=NULL)
+    {
+        cout<<ptr->data<<"\n";
+        ptr=ptr->next;
+    }
+}
+int main()
+{
+    linkedlist obj;
+    while(1)
+    {
+        cout<<"Press for 1.Insert 2.Delete 3.Search 4.Display 5.Exit"<<"\n";
+        int ch;
+        cin>>ch;
+        if(ch==1)
+        {
+            cout<<"Enter the no. you want to insert"<<"\n";
+            int n;
+            cin>>n;
+            obj.insertion(n);
+        }
+        else if(ch==2)
+        {
+            cout<<"Enter the no. you want to delete"<<"\n";
+            int n;
+            cin>>n;
+            obj.deleteion(n);
+        }
+        else if(ch==3)
+        {
+            cout<<"Enter the no. you want to Search"<<"\n";
+            int n;
+            cin>>n;
+            obj.searching(n);
+        }
+        else if(ch==4)
+        {
+            obj.display();
+        }
+        else
+        {
+            break;
+        }
+    }
+    return 0;
+}
