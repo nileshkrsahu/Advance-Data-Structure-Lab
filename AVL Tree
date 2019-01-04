@@ -1,0 +1,281 @@
+/*Nilesh Kuar Sahu
+MT/CS/10002/2018*/
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+
+struct anode
+{
+    int key;
+    int height;
+    anode *left,*right;
+};
+anode *root=NULL;
+class avltree
+{
+    public:
+        int maxi(int,int);
+        int height(anode*);
+        int balancefactor(anode*);
+        anode *createnode(int);
+        anode *leftrotate(anode*);
+        anode *rightrotate(anode*);
+        anode *insertion(anode*,int);
+        void preorder(anode*);
+        anode *findminimumvalue(anode*);
+        anode *deletion(anode*,int);
+        void searching(anode*,int);
+};
+int avltree::maxi(int a,int b)
+{
+    return (a>b)?a:b;
+}
+int avltree::height(anode *node)
+{
+    if(node==NULL)
+    {
+        return 0;
+    }
+    return node->height;
+}
+int avltree::balancefactor(anode* node)
+{
+    if(node==NULL)
+    {
+        return 0;
+    }
+    return height(node->left)-height(node->right);
+}
+anode* avltree::createnode(int key)
+{
+    anode *temp=new anode;
+    temp->key=key;
+    temp->left=temp->right=NULL;
+    temp->height=1;
+    return temp;
+}
+anode* avltree::leftrotate(anode *z)
+{
+    anode *y=z->right;
+    anode *t=y->left;
+
+    y->left=z;
+    z->right=t;
+
+    z->height=maxi(height(z->left),height(z->right))+1;
+    y->height=maxi(height(y->left),height(y->right))+1;
+
+    return y;
+}
+anode *avltree::rightrotate(anode *z)
+{
+    anode *y=z->left;
+    anode *t=y->right;
+
+    y->right=z;
+    z->left=t;
+
+    z->height=maxi(height(z->left),height(z->right))+1;
+    y->height=maxi(height(y->left),height(y->right))+1;
+
+    return y;
+}
+anode* avltree::insertion(anode *node,int key)
+{
+    if(node==NULL)
+    {
+        return createnode(key);
+    }
+    else
+    {
+        if(key<node->key)
+        {
+            node->left=insertion(node->left,key);
+        }
+        else
+        {
+            node->right=insertion(node->right,key);
+        }
+    }
+    node->height=maxi(height(node->left),height(node->right))+1;
+    int bf=balancefactor(node);
+    if(bf>1)
+    {
+        if(key<node->left->key) // LEFT LEFT IMBALANCE CASE
+        {
+            return rightrotate(node); // Right Rotate
+        }
+        else if(key>node->left->key) // LEFT RIGHT IMBALANCE CASE
+        {
+            node->left=leftrotate(node->left);
+            return rightrotate(node);
+        }
+    }
+    if(bf<-1)
+    {
+        if(key>node->right->key) // RIGHT RIGHT IMBALANCE CASE
+        {
+             return leftrotate(node);
+        }
+        else if(key<node->right->key) // RIGHT LEFT IMBALANCE CASE
+        {
+            node->right=rightrotate(node->right);
+            return leftrotate(node);
+        }
+    }
+    return node;
+}
+void avltree::preorder(anode *root)
+{
+    if(root!=NULL)
+    {
+        cout<<root->key<<" ";
+        preorder(root->left);
+        preorder(root->right);
+    }
+}
+void avltree::searching(anode *root,int key)
+{
+    if(root==NULL)
+    {
+        cout<<"Sorry The Element you tried to search is not present in the Apple AVL Tree"<<"\n";
+        return ;
+    }
+    else if(root->key==key)
+    {
+        cout<<"Congratulation The Element you tried to search is present in the Apple AVL Tree"<<"\n";
+        return ;
+    }
+    else
+    {
+        if(key<root->key)
+        {
+            searching(root->left,key);
+        }
+        else
+        {
+            searching(root->right,key);
+        }
+    }
+}
+anode* avltree::findminimumvalue(anode *root)
+{
+    anode *current=root;
+    while(current->left!=NULL)
+    {
+        current=current->left;
+    }
+    return current;
+}
+anode* avltree::deletion(anode *root,int key)
+{
+    if(root==NULL)
+    {
+        cout<<"Sorry Either the Tree is Empty or the Element is not present in the "<<"\n";
+        return root;
+    }
+    else if(key<root->key)
+    {
+        root->left=deletion(root->left,key);
+    }
+    else if(key>root->key)
+    {
+        root->right=deletion(root->right,key);
+    }
+    else
+    {
+        if(root->right==NULL)
+        {
+            anode *temp=root->left;
+            free(root);
+            return temp;
+        }
+        else if(root->left==NULL)
+        {
+            anode *temp=root->right;
+            free(root);
+            return temp;
+        }
+        anode *temp=findminimumvalue(root->right);
+        root->key=temp->key;
+        root->right=deletion(root->right,temp->key);
+    }
+    if(root==NULL)
+    {
+        return root;
+    }
+    root->height=maxi(height(root->left),height(root->right))+1;
+    int bf=balancefactor(root);
+    if(bf>1)
+    {
+        if(balancefactor(root->left)>=0) //LEFT LEFT IMBALACNCED CASE
+        {
+            return rightrotate(root);
+        }
+        else if(balancefactor(root->left)<0) //LEFT RIGHT IMBALANCED CASE
+        {
+            root->left=leftrotate(root->left);
+            return rightrotate(root);
+        }
+    }
+    if(bf<-1)
+    {
+        if(balancefactor(root->right)<=0) //RIGHT RIGHT IMBALACNCED CASE
+        {
+            return leftrotate(root);
+        }
+        else if(balancefactor(root->right)>0)
+        {
+            root->right=rightrotate(root->right);
+            return leftrotate(root);
+        }
+    }
+    return root;
+}
+int main()
+{
+    cout<<"Welcome to Apple AVL Tree"<<"\n";
+    avltree obj;
+    while(1)
+    {
+        cout<<"Please press for 1. Insertion 2.Deletion 3.Traversal 4.Search 5.Exit "<<"\n";
+        int ch;
+        cin>>ch;
+        if(ch==1)
+        {
+            cout<<"Welcome to Insertion Block of Apple AVL Tree"<<"\n";
+            cout<<"Please Enter the key value to insert "<<"\n";
+            int num;
+            cin>>num;
+            root=obj.insertion(root,num);
+        }
+        else if(ch==2)
+        {
+            cout<<"Welcome to Deletion Block of Apple AVL Tree"<<"\n";
+            cout<<"Please Enter the key value to delete"<<"\n";
+            int num;
+            cin>>num;
+            root=obj.deletion(root,num);
+        }
+        else if(ch==3)
+        {
+            cout<<"Welcome to Traversal Block of Apple AVL Tree"<<"\n";
+            cout<<"The Pre-order traversal of the Tree is "<<"\n";
+            obj.preorder(root);
+            cout<<"\n";
+        }
+        else if(ch==4)
+        {
+            cout<<"Welcome to Searching Block of Apple AVL Tree"<<"\n";
+            cout<<"Please Enter the key value which is to be searched"<<"\n";
+            int num;
+            cin>>num;
+            obj.searching(root,num);
+        }
+        else
+        {
+            break;
+        }
+    }
+    return 0;
+}
