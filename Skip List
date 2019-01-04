@@ -1,0 +1,222 @@
+/*Nilesh Kuar Sahu
+MT/CS/10002/2018*/
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+
+struct node
+{
+    public:
+        int key;
+        node **forwarding;
+        node(int,int);
+};
+node::node(int key,int level)
+{
+    this->key=key;
+    forwarding=new node*[level+1];
+    memset(forwarding,0,sizeof(node*)*(level+1));
+}
+
+class skip
+{
+    int maxlevel;
+    int level;
+    node *head;
+    public:
+        skip(int);
+        void insertion(int);
+        int randomflip();
+        node *createnode(int,int);
+        void searching(int);
+        void deleteion(int);
+        void display();
+};
+skip::skip(int maxlevel)
+{
+    this->maxlevel=maxlevel;
+    level=0;
+    head=new node(-1,maxlevel);
+}
+int skip::randomflip()
+{
+    int lvl=0;
+    while(((rand()%10)<5)&&lvl<maxlevel)
+    {
+        lvl++;
+    }
+    return lvl;
+}
+node* skip::createnode(int key,int level)
+{
+    node *p=new node(key,level);
+    return p;
+}
+void skip::insertion(int key)
+{
+    node *current=head;
+    node *update[maxlevel+1];
+    memset(update,0,sizeof(node*)*(maxlevel+1));
+    int i;
+    i=level;
+    while(i>=0)
+    {
+        while(current->forwarding[i]!=NULL && current->forwarding[i]->key<key)
+        {
+            current=current->forwarding[i];
+        }
+        update[i]=current;
+        i--;
+    }
+    current=current->forwarding[0];
+    int randomlevel=randomflip();
+    if(randomlevel>level)
+    {
+        i=level+1;
+        while(i<randomlevel+1)
+        {
+            update[i]=head;
+            i++;
+        }
+        level=randomlevel;
+    }
+    node *p=createnode(key,randomlevel);
+    i=0;
+    while(i<=randomlevel)
+    {
+        p->forwarding[i]=update[i]->forwarding[i];
+        update[i]->forwarding[i]=p;
+        i++;
+    }
+    cout<<"Congratulation The Element is successfully inserted"<<"\n";
+};
+void skip::searching(int key)
+{
+    node *current=head;
+    int i=level;
+    while(i>=0)
+    {
+        while(current->forwarding[i]!=NULL && current->forwarding[i]->key<key)
+        {
+            current=current->forwarding[i];
+        }
+        i--;
+    }
+    current=current->forwarding[0];
+    if(current->key==key)
+    {
+        cout<<"Congratulation The element is present in the Apple Skip List"<<"\n";
+    }
+    else
+    {
+        cout<<"Alas! Sorry we didn't found it, try another element"<<"\n";
+    }
+}
+void skip::deleteion(int key)
+{
+    node *current=head;
+    node *update[maxlevel+1];
+    memset(update,0,sizeof(node*)*(maxlevel+1));
+    int i;
+    i=level;
+    while(i>=0)
+    {
+        while(current->forwarding[i]!=NULL && current->forwarding[i]->key<key)
+        {
+            current=current->forwarding[i];
+        }
+        update[i]=current;
+        i--;
+    }
+    current=current->forwarding[0];
+    if(current->key==key)
+    {
+        i=0;
+        while(i<=level)
+        {
+            if(update[i]->forwarding[i]!=current)
+            {
+                break;
+            }
+            update[i]->forwarding[i]=current->forwarding[i];
+            i++;
+        }
+        free(current);
+        while(level>0&&head->forwarding[level]==NULL)
+        {
+            level=level-1;
+        }
+        cout<<"Congratulation you Successfully Deleted the Element"<<"\n";
+    }
+    else
+    {
+        cout<<"Alas! Sorry the element you wanted to delete is not found in the skip list"<<"\n";
+    }
+}
+void skip::display()
+{
+    cout<<"\n"<<"Here is Your Apple Skip List"<<"\n";
+    int i=0;
+    while(i<=level)
+    {
+        node *ptr=head->forwarding[i];
+        cout<<"Level "<<i<<" :  ";
+        while(ptr!=NULL)
+        {
+            cout<<ptr->key<<" ";
+            ptr=ptr->forwarding[i];
+        }
+        cout<<"\n";
+        i++;
+    }
+}
+int main()
+{
+    srand((unsigned)time(0));
+    cout<<"Welcome to Apple group Skip list"<<"\n";
+    cout<<"Please Enter the Max level you want to have"<<"\n";
+    int t;
+    cin>>t;
+    skip obj(t);
+    while(1)
+    {
+            cout<<"Press for 1.Insertion 2.Searching 3.Deletion 4.Display 5.Exit"<<"\n";
+            int ch;
+            cin>>ch;
+            if(ch==1)
+            {
+                cout<<"Welcome to Insertion block of Apple Skip list"<<"\n";
+                cout<<"Please Enter the number you want to insert in Apple Skip List"<<"\n";
+                int num;
+                cin>>num;
+                obj.insertion(num);
+            }
+            else if(ch==2)
+            {
+                cout<<"Welcome to Searching Maze of Apple Skip list"<<"\n";
+                cout<<"Please Enter the number you want to insert in Apple Skip List"<<"\n";
+                int num;
+                cin>>num;
+                obj.searching(num);
+            }
+            else if(ch==3)
+            {
+                cout<<"Welcome to Deletion block of Apple Skip list"<<"\n";
+                cout<<"Please Enter the number you want to delete in Apple Skip List"<<"\n";
+                int num;
+                cin>>num;
+                obj.deleteion(num);
+            }
+            else if(ch==4)
+            {
+                cout<<"Happy to hear that you want to display your Apple Skip List, Here is your Apple Skip List"<<"\n";
+                obj.display();
+            }
+            else
+            {
+                cout<<"Sorry to hear that you want to exit, Apple Skip List will miss You, Please Visit us again"<<"\n";
+                break;
+            }
+
+    }
+}
